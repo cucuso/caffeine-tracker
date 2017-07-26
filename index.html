@@ -1,0 +1,207 @@
+
+<html>
+<head>
+    
+    <script src="https://cdn.jsdelivr.net/momentjs/2.18.1/moment.min.js"></script>
+    <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
+    
+<script src="js/chart-data.js"></script>
+   
+<link href="css/timedropper.min.css" rel="stylesheet">
+
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Artifika|Pacifico" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+<script src="js/timedropper.min.js"></script>
+
+    
+</head>
+    
+<body>
+    <div class="container">
+    <div class="row">
+    <div class="col-md-12 title">
+            <h1>Caffeine Daily Tracker</h1>
+    
+    <h3>Total milligrams consumed: <span id="totalMg">0</span> mg</h3>
+    </div>
+       <div class="col-md-9">  
+    <div style="max-width: 700px">
+   <canvas id="myChart" width="400" height="300"></canvas>
+    </div>
+        </div>
+    <div class="col-md-3 ">
+    <div class="text-right">
+    <input type="text" id="time">
+    </div>
+    
+    <ul>
+    
+    <li>
+<button class="btn btn-primary" onclick="addCaffeine(80)">
+ <div class="coffee-stack ">
+  <i class="fa fa-coffee"></i>
+  <span class="coffee-day">Cortadito</span>
+</div>  
+</button>
+        
+        
+    </li>
+        
+        <li>
+        
+        <button class="btn btn-primary" onclick="addCaffeine(63)"> 
+            
+            <div class="coffee-stack ">
+  <i class="fa fa-coffee"></i>
+  <span class="coffee-day">Espresso</span>
+</div>
+            </button>
+            
+        </li>
+        
+   
+        <li>
+        
+             <button class="btn btn-primary" onclick="addCaffeine(130)">          
+                 <div class="coffee-stack ">
+  <i class="fa fa-coffee"></i>
+  <span class="coffee-day">Featured Dark Roast - Short</span>
+</div>
+            </button>
+        
+        </li>
+        
+        
+        <li>
+      
+        <button class="btn btn-primary" onclick="addCaffeine(260)">     
+            
+            <div class="coffee-stack ">
+  <i class="fa fa-coffee"></i>
+  <span class="coffee-day">Featured Dark Roast - Grande</span>
+</div>
+            </button>
+        
+        </li>
+        
+        <li>
+        <button class="btn btn-primary" onclick="addCaffeine(75)">        
+            
+            <div class="coffee-stack ">
+  <i class="fa fa-coffee"></i>
+  <span class="coffee-day">Caffe Americano - Short</span>
+</div>
+            </button>
+        
+        </li>
+        
+        <li>
+        
+           
+<button class="btn btn-primary" onclick="addCaffeine(130)"> 
+    
+    <div class="coffee-stack ">
+  <i class="fa fa-coffee"></i>
+  <span class="coffee-day">Caffe Americano - Grande</span>
+</div>
+
+</button>
+        
+        </li>
+        
+        <li>
+        <button class="btn btn-primary" onclick="addCaffeine(null)">   <div class="coffee-stack ">
+  <i class="fa fa-coffee"></i>
+  <span class="coffee-day">Remove coffee</span>
+</div></button>
+        </li>
+    
+</ul>
+
+
+
+
+    
+    </div>
+        </div>
+</div>    
+</body>
+    
+    <script>
+    $("#time").timeDropper({meridians: true,
+});
+    </script>
+    
+<script>
+
+var RATE_OF_CAFFEINE_ABSORB;
+var totalMg = 0;
+var coffeesDrank = [];
+    
+function addCaffeine(amount) {
+     
+    
+    var time =  moment(document.getElementById('time').value, 'hh:mm a').hour();
+    var data = myChart.data.datasets[0].data;
+    var points = myChart.data.datasets[0].pointStyle;
+    
+    // Remove point
+    if(amount === null){
+      coffeesDrank[time] = undefined; 
+      data[time] = data[time-1] - RATE_OF_CAFFEINE_ABSORB;
+      points[time] = "round";
+    }else{
+    
+    coffeesDrank[time] = amount;
+    data[time] = amount;
+    points[time] = "triangle"; 
+    
+    }
+    
+  count =0;
+  for(var i=time+1; i < 24; i++ ){            
+        if(coffeesDrank[i] !== undefined)
+            break;
+        
+        if(count === 0 || count%3 === 0) {
+        RATE_OF_CAFFEINE_ABSORB = data[i-1]/4;
+        count=0;
+        }
+        
+        count++;
+        
+        data[i] = data[i-1] - RATE_OF_CAFFEINE_ABSORB;
+       
+    }
+    
+    myChart.update();
+    this.calculateTotalMg();
+ 
+}
+    
+ 
+    
+function calculateTotalMg() {
+    var totalMg = 0;
+    for(var i=0; i < coffeesDrank.length; i ++) {
+        var amt = coffeesDrank[i];
+       totalMg+= (amt)?amt:0;
+    }
+    
+     var totalMgSpan = document.getElementById('totalMg').innerHTML = totalMg; 
+}  
+    
+var ctx = document.getElementById("myChart").getContext('2d');
+var myChart = new Chart(ctx, {
+    type: 'line',
+    data: data,
+    options: options
+});
+</script>
+</html>
